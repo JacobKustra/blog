@@ -1,0 +1,9 @@
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: blogadmin
+      POSTGRES_PASSWORD: blogpw
+      POSTGRES_DB: blogdb
+    ports:
+      - "5432:5432"

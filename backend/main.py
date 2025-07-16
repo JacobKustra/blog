@@ -3,18 +3,17 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from .models import BlogPost
+from models import BlogPost
 from typing import List
 import os
 from dotenv import load_dotenv
 
 
 # Load .env file from the backend directory (one level up)
-load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '..', '.env'))
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '.env'))
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL:
-    logger.error("DATABASE_URL not found in .env file")
     raise ValueError("DATABASE_URL must be set in .env file")
 
 
@@ -36,7 +35,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://localhost", "*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

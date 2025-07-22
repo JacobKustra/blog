@@ -9,13 +9,11 @@ import os
 from dotenv import load_dotenv
 
 
-# Load .env file from the backend directory (one level up)
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '.env'))
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL:
     raise ValueError("DATABASE_URL must be set in .env file")
-
 
 
 engine = create_engine(DATABASE_URL)
@@ -35,7 +33,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost", "*"],
+    allow_origins=["http://localhost:80", "http://localhost", "http://frontend:80", "http://ovrbld.com"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -65,17 +63,12 @@ def create_post(post: BlogPost, db: SessionLocal = Depends(get_db)):
 def read_posts(db: SessionLocal = Depends(get_db)):
     return db.query(BlogPostDB).all()
 
-
-
 @app.get("/posts/{post_id}", response_model=BlogPost)
 def read_post(post_id: int, db: SessionLocal = Depends(get_db)):
     post = db.query(BlogPostDB).filter(BlogPostDB.id == post_id).first()
     if post is None:
         raise HTTPException(status_code=404, detail="Post not found")
     return post
-
-
-
 
 @app.put("/posts/{post_id}", response_model=BlogPost)
 def update_post(post_id: int, updated_post: BlogPost, db: SessionLocal = Depends(get_db)):
@@ -94,16 +87,5 @@ def delete_post(post_id: int, db: SessionLocal = Depends(get_db)):
     db.delete(db_post)
     db.commit()
     return {"message": "Post deleted"}
-
-
-
-
-
-
-
-
-
-
-
 
 

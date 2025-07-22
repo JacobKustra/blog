@@ -1,6 +1,18 @@
 
+let BASE_URL;
+
+try {
+    const module = await import('./config.js'); 
+    const config = module.default;
+    BASE_URL = config.BASE_URL;
+
+} catch (error) {
+    BASE_URL = 'http://localhost:8000'; // Default to localhost
+    console.warn('config.js not found, defaulting to localhost:', BASE_URL);
+}
+
 function fetchPosts() {
-    fetch('http://localhost:8000/posts/')
+    fetch(`${BASE_URL}/posts/`)
         .then(response => {
             if (!response.ok) throw new Error('Failed to fetch posts');
             return response.json();
@@ -28,8 +40,8 @@ function fetchPosts() {
                 button.addEventListener('click', function() {
                     const postId = parseInt(this.parentElement.dataset.id); // Ensure numeric
                     console.log('Edit clicked, postId:', postId, 'Type:', typeof postId);
-                    console.log('Fetching URL:', `http://localhost:8000/posts/${postId}`);
-                    fetch(`http://localhost:8000/posts/${postId}`, {
+                    console.log('Fetching URL:', `${BASE_URL}/posts/${postId}`);
+                    fetch(`${BASE_URL}/posts/${postId}`, {
                         method: 'GET',
                         headers: {
                             'Accept': 'application/json'
@@ -62,7 +74,7 @@ function fetchPosts() {
                     const postId = parseInt(this.parentElement.dataset.id); // Ensure numeric
                     console.log('Delete clicked, postId:', postId, 'Type:', typeof postId);
                     if (confirm('Are you sure you want to delete this post?')) {
-                        fetch(`http://localhost:8000/posts/${postId}`, {
+                        fetch(`${BASE_URL}/posts/${postId}`, {
                             method: 'DELETE'
                         })
                         .then(response => {
@@ -91,7 +103,7 @@ document.getElementById('create-post-form').addEventListener('submit', function(
     const title = document.getElementById('title').value;
     const content = document.getElementById('content').value;
     const author = document.getElementById('author').value;
-    fetch('http://localhost:8000/posts/', {
+    fetch(`${BASE_URL}/posts/`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -116,7 +128,7 @@ document.getElementById('edit-post-form').addEventListener('submit', function(ev
     const content = document.getElementById('edit-content').value;
     const author = document.getElementById('edit-author').value;
     console.log('Submitting edit for postId:', id);
-    fetch(`http://localhost:8000/posts/${id}`, {
+    fetch(`${BASE_URL}/posts/${id}`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json'

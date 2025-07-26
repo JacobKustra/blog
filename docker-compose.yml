@@ -10,7 +10,7 @@ services:
     volumes:
       - db-data:/var/lib/postgresql/data
     networks:
-      - app-network
+      - blog-network
     env_file:
       - ./.env
   backend:
@@ -22,15 +22,15 @@ services:
     command:
       ["sh", "-c", "sleep 3 && uvicorn main:app --host 0.0.0.0 --port 8000"]
     networks:
-      - app-network
+      - blog-network
   frontend:
     build: ./frontend
     ports:
       - "3000:3000"
     networks:
-      - app-network
+      - blog-network
 networks:
-  app-network:
+  blog-network:
     driver: bridge
 volumes:
   db-data:

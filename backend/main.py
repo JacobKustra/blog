@@ -33,7 +33,7 @@ app = FastAPI(docs_url=None, redoc_url=None)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:80", "http://localhost", "http://frontend:80", "http://ovrbld.com"],
+    allow_origins=["http://localhost:3000", "http://localhost", "http://frontend:3000", "http://ovrbld.com"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

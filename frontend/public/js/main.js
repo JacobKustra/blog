@@ -1,20 +1,11 @@
+// Use a relative path so it works with HTTPS and Nginx proxy
+const BASE_URL = '/api';
 
-let BASE_URL;
-
-try {
-    const module = await import('./config.js'); 
-    const config = module.default;
-    BASE_URL = config.BASE_URL;
-
-} catch (error) {
-    BASE_URL = 'http://localhost:8000'; // Default to localhost
-    console.warn('config.js not found, defaulting to localhost:', BASE_URL);
-}
-
+// Fetch and render all posts
 function fetchPosts() {
     fetch(`${BASE_URL}/posts/`)
         .then(response => {
-            if (!response.ok) throw new Error('Failed to fetch posts');
+            if (!response.ok) throw new Error(`Failed to fetch posts: ${response.status}`);
             return response.json();
         })
         .then(data => {
@@ -22,10 +13,9 @@ function fetchPosts() {
             const postsDiv = document.getElementById('posts');
             postsDiv.innerHTML = '';
             data.forEach(post => {
-                console.log('Rendering post with ID:', post.id);
                 const postElement = document.createElement('div');
                 postElement.className = 'post';
-                postElement.dataset.id = parseInt(post.id); // Ensure ID is numeric
+                postElement.dataset.id = parseInt(post.id);
                 postElement.innerHTML = `
                     <h2>${post.title}</h2>
                     <p>${post.content}</p>
@@ -35,62 +25,7 @@ function fetchPosts() {
                 `;
                 postsDiv.appendChild(postElement);
             });
-
-            document.querySelectorAll('.edit-button').forEach(button => {
-                button.addEventListener('click', function() {
-                    const postId = parseInt(this.parentElement.dataset.id); // Ensure numeric
-                    console.log('Edit clicked, postId:', postId, 'Type:', typeof postId);
-                    console.log('Fetching URL:', `${BASE_URL}/posts/${postId}`);
-                    fetch(`${BASE_URL}/posts/${postId}`, {
-                        method: 'GET',
-                        headers: {
-                            'Accept': 'application/json'
-                        }
-                    })
-                        .then(response => {
-                            console.log('Edit fetch response:', response.status, response.statusText);
-                            if (!response.ok) {
-                                throw new Error(`Failed to fetch post: ${response.status} ${response.statusText}`);
-                            }
-                            return response.json();
-                        })
-                        .then(post => {
-                            console.log('Post loaded:', post);
-                            document.getElementById('edit-id').value = post.id;
-                            document.getElementById('edit-title').value = post.title;
-                            document.getElementById('edit-content').value = post.content;
-                            document.getElementById('edit-author').value = post.author;
-                            document.getElementById('edit-post-form').style.display = 'block';
-                        })
-                        .catch(error => {
-                            console.error('Fetch error:', error);
-                            alert('Error loading post: ' + error.message);
-                        });
-                });
-            });
-
-            document.querySelectorAll('.delete-button').forEach(button => {
-                button.addEventListener('click', function() {
-                    const postId = parseInt(this.parentElement.dataset.id); // Ensure numeric
-                    console.log('Delete clicked, postId:', postId, 'Type:', typeof postId);
-                    if (confirm('Are you sure you want to delete this post?')) {
-                        fetch(`${BASE_URL}/posts/${postId}`, {
-                            method: 'DELETE'
-                        })
-                        .then(response => {
-                            console.log('Delete response:', response.status, response.statusText);
-                            if (!response.ok) {
-                                throw new Error(`Failed to delete post: ${response.status} ${response.statusText}`);
-                            }
-                            fetchPosts();
-                        })
-                        .catch(error => {
-                            console.error('Delete error:', error);
-                            alert('Error: ' + error.message);
-                        });
-                    }
-                });
-            });
+            attachEditDeleteHandlers();
         })
         .catch(error => {
             console.error('Error fetching posts:', error);
@@ -98,56 +33,105 @@ function fetchPosts() {
         });
 }
 
-document.getElementById('create-post-form').addEventListener('submit', function(event) {
+// Attach event handlers to edit/delete buttons
+function attachEditDeleteHandlers() {
+    document.querySelectorAll('.edit-button').forEach(button => {
+        button.addEventListener('click', function () {
+            const postId = parseInt(this.parentElement.dataset.id);
+            console.log('Edit clicked, postId:', postId);
+
+            fetch(`${BASE_URL}/posts/${postId}`)
+                .then(response => {
+                    if (!response.ok) throw new Error(`Failed to fetch post ${postId}`);
+                    return response.json();
+                })
+                .then(post => {
+                    document.getElementById('edit-id').value = post.id;
+                    document.getElementById('edit-title').value = post.title;
+                    document.getElementById('edit-content').value = post.content;
+                    document.getElementById('edit-author').value = post.author;
+                    document.getElementById('edit-post-form').style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Fetch error:', error);
+                    alert('Error loading post: ' + error.message);
+                });
+        });
+    });
+
+    document.querySelectorAll('.delete-button').forEach(button => {
+        button.addEventListener('click', function () {
+            const postId = parseInt(this.parentElement.dataset.id);
+            if (confirm('Are you sure you want to delete this post?')) {
+                fetch(`${BASE_URL}/posts/${postId}`, {
+                    method: 'DELETE'
+                })
+                    .then(response => {
+                        if (!response.ok) throw new Error(`Failed to delete post ${postId}`);
+                        fetchPosts();
+                    })
+                    .catch(error => {
+                        console.error('Delete error:', error);
+                        alert('Error: ' + error.message);
+                    });
+            }
+        });
+    });
+}
+
+// Handle creating a new post
+document.getElementById('create-post-form').addEventListener('submit', function (event) {
     event.preventDefault();
     const title = document.getElementById('title').value;
     const content = document.getElementById('content').value;
     const author = document.getElementById('author').value;
+
     fetch(`${BASE_URL}/posts/`, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({title, content, author})
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, content, author })
     })
-    .then(response => {
-        if (!response.ok) throw new Error('Failed to create post');
-        return response.json();
-    })
-    .then(data => {
-        document.getElementById('create-post-form').reset();
-        fetchPosts();
-    })
-    .catch(error => alert('Error creating post: ' + error.message));
+        .then(response => {
+            if (!response.ok) throw new Error('Failed to create post');
+            return response.json();
+        })
+        .then(() => {
+            document.getElementById('create-post-form').reset();
+            fetchPosts();
+        })
+        .catch(error => alert('Error creating post: ' + error.message));
 });
 
-document.getElementById('edit-post-form').addEventListener('submit', function(event) {
+// Handle editing an existing post
+document.getElementById('edit-post-form').addEventListener('submit', function (event) {
     event.preventDefault();
-    const id = parseInt(document.getElementById('edit-id').value); // Ensure numeric
+    const id = parseInt(document.getElementById('edit-id').value);
     const title = document.getElementById('edit-title').value;
     const content = document.getElementById('edit-content').value;
     const author = document.getElementById('edit-author').value;
-    console.log('Submitting edit for postId:', id);
+
     fetch(`${BASE_URL}/posts/${id}`, {
         method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({title, content, author})
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, content, author })
     })
-    .then(response => {
-        if (!response.ok) throw new Error('Failed to update post');
-        return response.json();
-    })
-    .then(data => {
-        document.getElementById('edit-post-form').style.display = 'none';
-        fetchPosts();
-    })
-    .catch(error => alert('Error updating post: ' + error.message));
+        .then(response => {
+            if (!response.ok) throw new Error('Failed to update post');
+            return response.json();
+        })
+        .then(() => {
+            document.getElementById('edit-post-form').style.display = 'none';
+            fetchPosts();
+        })
+        .catch(error => alert('Error updating post: ' + error.message));
 });
 
-document.getElementById('cancel-edit').addEventListener('click', function() {
+// Cancel editing
+document.getElementById('cancel-edit').addEventListener('click', function () {
     document.getElementById('edit-post-form').style.display = 'none';
 });
 
+// Initial load
 fetchPosts();
+
+

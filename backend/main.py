@@ -33,7 +33,7 @@ app = FastAPI(docs_url=None, redoc_url=None)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost", "http://frontend:3000", "http://ovrbld.com"],
+    allow_origins=["*", "http://localhost:3000", "http://localhost", "http://frontend:3000", "http://ovrbld.com"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -87,5 +87,6 @@ def delete_post(post_id: int, db: SessionLocal = Depends(get_db)):
     db.delete(db_post)
     db.commit()
     return {"message": "Post deleted"}
+
 
 

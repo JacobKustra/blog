@@ -1,8 +1,11 @@
 // Use a relative path so it works with HTTPS and Nginx proxy
 const BASE_URL = '/api';
 
-// Fetch and render all posts
+// Fetch and render all posts (only if #posts exists)
 function fetchPosts() {
+    const postsDiv = document.getElementById('posts');
+    if (!postsDiv) return; // Don't proceed if posts container isn't present
+
     fetch(`${BASE_URL}/posts/`)
         .then(response => {
             if (!response.ok) throw new Error(`Failed to fetch posts: ${response.status}`);
@@ -10,7 +13,6 @@ function fetchPosts() {
         })
         .then(data => {
             console.log('Posts fetched:', data);
-            const postsDiv = document.getElementById('posts');
             postsDiv.innerHTML = '';
             data.forEach(post => {
                 const postElement = document.createElement('div');
@@ -46,11 +48,14 @@ function attachEditDeleteHandlers() {
                     return response.json();
                 })
                 .then(post => {
+                    const editForm = document.getElementById('edit-post-form');
+                    if (!editForm) return;
+
                     document.getElementById('edit-id').value = post.id;
                     document.getElementById('edit-title').value = post.title;
                     document.getElementById('edit-content').value = post.content;
                     document.getElementById('edit-author').value = post.author;
-                    document.getElementById('edit-post-form').style.display = 'block';
+                    editForm.style.display = 'block';
                 })
                 .catch(error => {
                     console.error('Fetch error:', error);
@@ -80,58 +85,69 @@ function attachEditDeleteHandlers() {
 }
 
 // Handle creating a new post
-document.getElementById('create-post-form').addEventListener('submit', function (event) {
-    event.preventDefault();
-    const title = document.getElementById('title').value;
-    const content = document.getElementById('content').value;
-    const author = document.getElementById('author').value;
+const createPostForm = document.getElementById('create-post-form');
+if (createPostForm) {
+    createPostForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+        const title = document.getElementById('title').value;
+        const content = document.getElementById('content').value;
+        const author = document.getElementById('author').value;
 
-    fetch(`${BASE_URL}/posts/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, content, author })
-    })
-        .then(response => {
-            if (!response.ok) throw new Error('Failed to create post');
-            return response.json();
+        fetch(`${BASE_URL}/posts/`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title, content, author })
         })
-        .then(() => {
-            document.getElementById('create-post-form').reset();
-            fetchPosts();
-        })
-        .catch(error => alert('Error creating post: ' + error.message));
-});
+            .then(response => {
+                if (!response.ok) throw new Error('Failed to create post');
+                return response.json();
+            })
+            .then(() => {
+                createPostForm.reset();
+                if (document.getElementById('posts')) fetchPosts(); // Refresh only if listing is present
+            })
+            .catch(error => alert('Error creating post: ' + error.message));
+    });
+}
 
 // Handle editing an existing post
-document.getElementById('edit-post-form').addEventListener('submit', function (event) {
-    event.preventDefault();
-    const id = parseInt(document.getElementById('edit-id').value);
-    const title = document.getElementById('edit-title').value;
-    const content = document.getElementById('edit-content').value;
-    const author = document.getElementById('edit-author').value;
+const editPostForm = document.getElementById('edit-post-form');
+if (editPostForm) {
+    editPostForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+        const id = parseInt(document.getElementById('edit-id').value);
+        const title = document.getElementById('edit-title').value;
+        const content = document.getElementById('edit-content').value;
+        const author = document.getElementById('edit-author').value;
 
-    fetch(`${BASE_URL}/posts/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, content, author })
-    })
-        .then(response => {
-            if (!response.ok) throw new Error('Failed to update post');
-            return response.json();
+        fetch(`${BASE_URL}/posts/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title, content, author })
         })
-        .then(() => {
-            document.getElementById('edit-post-form').style.display = 'none';
-            fetchPosts();
-        })
-        .catch(error => alert('Error updating post: ' + error.message));
-});
+            .then(response => {
+                if (!response.ok) throw new Error('Failed to update post');
+                return response.json();
+            })
+            .then(() => {
+                editPostForm.style.display = 'none';
+                if (document.getElementById('posts')) fetchPosts(); // Refresh only if listing is present
+            })
+            .catch(error => alert('Error updating post: ' + error.message));
+    });
+}
 
 // Cancel editing
-document.getElementById('cancel-edit').addEventListener('click', function () {
-    document.getElementById('edit-post-form').style.display = 'none';
-});
+const cancelEditButton = document.getElementById('cancel-edit');
+if (cancelEditButton) {
+    cancelEditButton.addEventListener('click', function () {
+        const editForm = document.getElementById('edit-post-form');
+        if (editForm) editForm.style.display = 'none';
+    });
+}
 
-// Initial load
-fetchPosts();
-
+// Initial load (only if posts container is present)
+if (document.getElementById('posts')) {
+    fetchPosts();
+}
 

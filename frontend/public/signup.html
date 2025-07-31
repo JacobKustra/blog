@@ -8,23 +8,21 @@
   </head>
   <body>
     <a href="/"> Home </a>
-    <br />
-    <a href="post.html"> Create A Post </a>
 
-    <h2>Login</h2>
-    <form id="login-form">
+    <h2>Sign Up</h2>
+    <form id="signup-form">
       <label for="username">Username:</label>
       <input type="text" id="username" required /><br />
       <label for="password">Password:</label>
       <input type="password" id="password" required /><br />
-      <button type="submit">Login</button>
+      <label for="password2">Please Type Your Password Again:</label>
+      <input type="password" id="password2" required /><br />
+      <button type="submit">Sign Up</button>
     </form>
-    <p id="login-error" style="color: red; display: none">
-      Invalid credentials.
+    <p id="error" style="color: red; display: none">
+      Passwords do not match or user already exsists
     </p>
 
-    <a href="signup.html"> Sign Up Here </a>
-
-    <script type="module" src="/js/login.js"></script>
+    <script type="module" src="/js/signup.js"></script>
   </body>
 </html>

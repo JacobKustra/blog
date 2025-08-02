@@ -3,27 +3,29 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My Blog</title>
+    <title>Login</title>
     <link rel="stylesheet" href="/css/styles.css" />
   </head>
   <body>
-    <a href="/"> Home </a>
-    <br />
-    <a href="post.html"> Create A Post </a>
+    <nav>
+      <a href="/">Home</a>
+      <a id="login-link" href="/login.html">Login</a>
+      <a id="signup-link" href="/signup.html">Sign Up</a>
+      <a id="create-post-link" href="/post.html" style="display: none"
+        >Create a Post</a
+      >
+      <a id="logout-link" href="#" style="display: none">Logout</a>
+    </nav>
 
     <h2>Login</h2>
     <form id="login-form">
       <label for="username">Username:</label>
-      <input type="text" id="username" required /><br />
+      <input type="text" id="username" name="username" required /><br />
       <label for="password">Password:</label>
-      <input type="password" id="password" required /><br />
+      <input type="password" id="password" name="password" required /><br />
       <button type="submit">Login</button>
+      <div id="login-error" style="display: none; color: red"></div>
     </form>
-    <p id="login-error" style="color: red; display: none">
-      Invalid credentials.
-    </p>
-
-    <a href="signup.html"> Sign Up Here </a>
 
     <script type="module" src="/js/login.js"></script>
   </body>

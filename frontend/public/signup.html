@@ -3,25 +3,31 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My Blog</title>
+    <title>Sign Up</title>
     <link rel="stylesheet" href="/css/styles.css" />
   </head>
   <body>
-    <a href="/"> Home </a>
+    <nav>
+      <a href="/">Home</a>
+      <a id="login-link" href="/login.html">Login</a>
+      <a id="signup-link" href="/signup.html">Sign Up</a>
+      <a id="create-post-link" href="/post.html" style="display: none"
+        >Create a Post</a
+      >
+      <a id="logout-link" href="#" style="display: none">Logout</a>
+    </nav>
 
     <h2>Sign Up</h2>
     <form id="signup-form">
       <label for="username">Username:</label>
-      <input type="text" id="username" required /><br />
+      <input type="text" id="username" name="username" required /><br />
       <label for="password">Password:</label>
-      <input type="password" id="password" required /><br />
-      <label for="password2">Please Type Your Password Again:</label>
-      <input type="password" id="password2" required /><br />
+      <input type="password" id="password" name="password" required /><br />
+      <label for="password2">Confirm Password:</label>
+      <input type="password" id="password2" name="password2" required /><br />
       <button type="submit">Sign Up</button>
+      <div id="error" style="display: none; color: red"></div>
     </form>
-    <p id="error" style="color: red; display: none">
-      Passwords do not match or user already exsists
-    </p>
 
     <script type="module" src="/js/signup.js"></script>
   </body>
